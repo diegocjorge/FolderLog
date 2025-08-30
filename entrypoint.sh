@@ -17,11 +17,14 @@ for dir in /watched/*; do
         touch "$log_file"
         echo "Watching $dir -> $log_file"
 
-        inotifywait -m -r ${EXCLUDE_REGEX:+--exclude "$EXCLUDE_REGEX"} "$dir" \
-            -e create -e delete -e modify -e move --format '%w|%e|%f' |
-        while IFS='|' read -r filepath event filename; do
-            echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] ${filepath}${filename}" >> "$log_file"
-        done &
+        # Start inotifywait in background for each folder
+        (
+            inotifywait -m -r ${EXCLUDE_REGEX:+--exclude "$EXCLUDE_REGEX"} "$dir" \
+                -e create -e delete -e modify -e move --format '%w|%e|%f' |
+            while IFS='|' read -r filepath event filename; do
+                echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] ${filepath}${filename}" >> "$log_file"
+            done
+        ) &
     fi
 done
 
