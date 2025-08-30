@@ -9,5 +9,5 @@ services:
       - ./logs:/logs
     environment:
       - LOG_EXT=.txt
-    # - EXCLUDE_REGEX=.*\.tmp   #optional
+    # - EXCLUDE_REGEX=.*(\.partial|\.tmp|\.swp|~)$   #OPTIONAL, in this exemple it excludes files ending with .partial, .tmp, .swp, or ~ (most common temporary files)
     restart: unless-stopped

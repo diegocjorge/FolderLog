@@ -16,9 +16,9 @@ for dir in /watched/*; do
         echo "Watching $dir -> $log_file"
 
         inotifywait -m -r ${EXCLUDE_REGEX:+--exclude "$EXCLUDE_REGEX"} "$dir" \
-            -e create -e delete -e modify -e move --format '%w%f %e' |
-        while read -r filepath event; do
-            echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] $filepath"
+            -e create -e delete -e modify -e move --format '%w|%e|%f' |
+        while IFS='|' read -r filepath event filename; do
+            echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] $filepath$filename"
         done >> "$log_file" &
     fi
 done
