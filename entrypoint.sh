@@ -12,7 +12,7 @@ echo "📂 Watching all directories inside /watched"
 # Function to sync logs
 sync_logs() {
     echo "🔄 Syncing logs to /logs"
-    rsync -a /log_temp/ /logs/
+    rsync -a --no-perms --no-owner --no-group /log_temp/ /logs/
 }
 
 # Trap SIGTERM for graceful shutdown
