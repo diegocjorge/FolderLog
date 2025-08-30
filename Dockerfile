@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache inotify-tools coreutils bash rsync
+RUN apk add --no-cache bash inotify-tools coreutils
 
 WORKDIR /app
 

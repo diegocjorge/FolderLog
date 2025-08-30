@@ -2,6 +2,92 @@
   <img src="icon.png" alt="FolderLog icon" width="120"/>
 </p>
 
+<p align="center">
+  <img src="icon.svg" alt="FolderLog icon" width="120"/>
+</p>
+
+# FolderLog
+
+FolderLog is a minimal Docker container to watch folders and log file changes.
+
+---
+
+## Features
+- Recursive monitoring of all top-level directories in `/watched`
+- Logs written to `/logs`
+- One log file per folder
+- Configurable log file extension (`LOG_EXT`)
+- Optional exclusion regex (`EXCLUDE_REGEX`)
+- Minimal CPU and memory usage (Alpine + inotify-tools)
+
+---
+
+## Usage
+Mount your folders and logs:
+
+### Docker Compose
+```yaml
+version: "3.9"
+services:
+  folderlog:
+    image: ghcr.io/diegocjorge/folderlog:latest
+    container_name: folderlog
+    volumes:
+      - ./folder1:/watched/folder1:ro
+      - ./folder2:/watched/folder2:ro
+      - ./logs:/logs
+    environment:
+      - LOG_EXT=.txt
+    # - EXCLUDE_REGEX=.*\.tmp   #optional
+    restart: unless-stopped
+```
+
+### Docker Run Example
+```bash
+docker run -d \
+  -v ./folder1:/watched/folder1:ro \
+  -v ./folder2:/watched/folder2:ro \
+  -v ./logs:/logs \
+  -e LOG_EXT=.txt \
+  ghcr.io/diegocjorge/folderlog:latest
+```
+
+### Notes
+
+* You can mount **multiple directories** directly under `/watched` by specifying multiple `-v` options in your Docker run command.
+* Each top-level folder inside `/watched` will have its own separate log file named after the folder (e.g., `folder1.txt`, `folder2.txt`).
+* Events from subfolders are included in their parent folder’s log file.
+
+---
+
+## Environment Variables
+
+| Variable      | Description                                  | Example Values                          |
+|---------------|----------------------------------------------|---------------------------------------|
+| `LOG_EXT`     | File extension for log files (default `.log`) | `.log`, `.txt`                        |
+| `EXCLUDE_REGEX` | Regex pattern to exclude files or folders from logging | `.*\.tmp`                  |
+
+- **Simple regex example:** Exclude all files ending with `.tmp`  
+  `EXCLUDE_REGEX=.*\.tmp`
+
+- **Advanced regex example:** Exclude any files/folders inside `tmp` or `cache` directories  
+  `EXCLUDE_REGEX=.*/(tmp|cache)/.*`
+
+---
+
+## License
+MIT License
+
+
+
+
+
+
+
+
+
+
+
 # FolderLog
 
 **FolderLog** is a lightweight Docker container that monitors **all directories inside `/watched`**.  
@@ -102,22 +188,3 @@ Each log entry includes a timestamp, event type, and affected file or folder pat
 
 This makes it easy to track changes and events inside each monitored folder.
 
----
-
-## Environment Variables
-
-| Variable      | Description                                  | Example Values                          |
-|---------------|----------------------------------------------|---------------------------------------|
-| `LOG_EXT`     | File extension for log files (default `.log`) | `.log`, `.txt`                        |
-| `EXCLUDE_REGEX` | Regex pattern to exclude files or folders from logging | `.*\.tmp`                  |
-
-- **Simple regex example:** Exclude all files ending with `.tmp`  
-  `EXCLUDE_REGEX=.*\.tmp`
-
-- **Advanced regex example:** Exclude any files/folders inside `tmp` or `cache` directories  
-  `EXCLUDE_REGEX=.*/(tmp|cache)/.*`
-
----
-
-## License
-MIT License

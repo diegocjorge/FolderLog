@@ -1,29 +1,17 @@
 #!/bin/bash
 set -e
 
-LOG_EXT=${LOG_EXT:-.log}
+LOG_EXT=${LOG_EXT:-.txt}
 EXCLUDE_REGEX=${EXCLUDE_REGEX:-}
 
-mkdir -p /log_temp
 mkdir -p /logs
 
 echo "📂 Watching all directories inside /watched"
 
-# Function to sync logs
-sync_logs() {
-    echo "🔄 Syncing logs to /logs"
-    rsync -a --no-perms --no-owner --no-group /log_temp/ /logs/
-}
-
-# Trap SIGTERM for graceful shutdown
-trap 'echo "⚡ Container stopping..."; sync_logs; exit 0' SIGTERM
-
-# Start watchers for each top-level directory
 for dir in /watched/*; do
     if [ -d "$dir" ]; then
         root_dir=$(basename "$dir")
-        log_file="/log_temp/${root_dir}${LOG_EXT}"
-        mkdir -p "$(dirname "$log_file")"
+        log_file="/logs/${root_dir}${LOG_EXT}"
         touch "$log_file"
         echo "Watching $dir -> $log_file"
 
@@ -31,12 +19,9 @@ for dir in /watched/*; do
             -e create -e delete -e modify -e move --format '%w%f %e' |
         while read -r filepath event; do
             echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] $filepath"
-        done | tee -a "$log_file" >/dev/null &
+        done >> "$log_file" &
     fi
+s
 done
 
-# Periodically sync /log_temp to /logs every 10 seconds
-while true; do
-    sync_logs
-    sleep 10
-done
+wait
