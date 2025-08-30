@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache bash inotify-tools coreutils
+RUN apk add --no-cache bash inotify-tools coreutils tzdata
 
 WORKDIR /app
 

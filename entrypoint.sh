@@ -3,6 +3,8 @@ set -e
 
 LOG_EXT=${LOG_EXT:-.txt}
 EXCLUDE_REGEX=${EXCLUDE_REGEX:-}
+TZ=${TZ:-UTC}
+export TZ
 
 mkdir -p /logs
 
@@ -18,8 +20,8 @@ for dir in /watched/*; do
         inotifywait -m -r ${EXCLUDE_REGEX:+--exclude "$EXCLUDE_REGEX"} "$dir" \
             -e create -e delete -e modify -e move --format '%w|%e|%f' |
         while IFS='|' read -r filepath event filename; do
-            echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] $filepath$filename"
-        done >> "$log_file" &
+            echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] ${filepath}${filename}" >> "$log_file"
+        done &
     fi
 done
 

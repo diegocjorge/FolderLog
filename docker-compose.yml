@@ -8,6 +8,7 @@ services:
       - ./folder2:/watched/folder2:ro
       - ./logs:/logs
     environment:
+      - TZ=America/Sao_Paulo
       - LOG_EXT=.txt
     # - EXCLUDE_REGEX=.*(\.partial|\.tmp|\.swp|~)$   #OPTIONAL, in this exemple it excludes files ending with .partial, .tmp, .swp, or ~ (most common temporary files)
     restart: unless-stopped

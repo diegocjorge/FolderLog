@@ -33,6 +33,7 @@ services:
       - ./folder2:/watched/folder2:ro
       - ./logs:/logs
     environment:
+      - TZ=America/Sao_Paulo
       - LOG_EXT=.txt
     # - EXCLUDE_REGEX=.*\.tmp   #optional
     restart: unless-stopped
