@@ -21,7 +21,6 @@ for dir in /watched/*; do
             echo "$(date +'%Y-%m-%d %H:%M:%S') [$event] $filepath"
         done >> "$log_file" &
     fi
-s
 done
 
 wait

@@ -2,10 +2,6 @@
   <img src="icon.png" alt="FolderLog icon" width="120"/>
 </p>
 
-<p align="center">
-  <img src="icon.svg" alt="FolderLog icon" width="120"/>
-</p>
-
 # FolderLog
 
 FolderLog is a minimal Docker container to watch folders and log file changes.
