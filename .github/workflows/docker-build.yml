@@ -14,7 +14,7 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up QEMU
@@ -30,9 +30,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Build and Push (multi-arch)
+      - name: Build and Push Docker images
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
