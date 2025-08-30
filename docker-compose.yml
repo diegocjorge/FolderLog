@@ -4,19 +4,27 @@ services:
     image: ghcr.io/diegocjorge/folderlog:latest
     container_name: folderlog
     volumes:
-      # You can place one or multiple directories inside ./watched,
-      # or map specific folders directly as shown below:
+      # Mount one or multiple directories directly under /watched
       - ./folder1:/watched/folder1:ro
       - ./folder2:/watched/folder2:ro
+      
+      # Internal folder for writing logs temporarily inside the container
+      - folderlog_temp:/log_temp
+      
+      # Mount the logs directory as an external or SMB volume for persistent storage
       - ./logs:/logs
     environment:
-      - LOG_EXT=.txt  # Change to desired log file extension, e.g. .txt (.log is default)
+      - LOG_EXT=.txt  # Change the log file extension (default is .log)
 
       # Example 1: ignore temporary files ending with ".tmp"
       - EXCLUDE_REGEX=.*\.tmp  
 
       # Example 2: ignore everything inside "node_modules" directories
-      # (useful when monitoring project folders to avoid noise)
       # - EXCLUDE_REGEX=.*/node_modules/.*  
 
+      # Example 3: ignore multiple file types (.tmp, .log, .bak)
+      # - EXCLUDE_REGEX=.*\.(tmp|log|bak)$
     restart: unless-stopped
+
+volumes:
+  folderlog_temp:

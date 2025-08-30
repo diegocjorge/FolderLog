@@ -21,7 +21,8 @@ Each **top-level folder** inside `/watched` will have its own log file.
 
 ## Quick Start
 
-Run FolderLog with your directories mounted inside `/watched` and logs output to a mounted `/logs` directory:
+Run FolderLog with your directories mounted inside `/watched` and logs output to a mounted `/logs` directory.  
+**Important:** To ensure reliable log persistence and avoid issues with temporary files on SMB or other external mounts, FolderLog writes logs **first to an internal directory `/log_temp` inside the container**. These logs are then synchronized to the mounted `/logs` directory, which should be a persistent volume (e.g., SMB share or external mount). This two-step approach prevents potential file locking and temporary file problems that can occur when writing directly to external mounts.
 
 ### With Docker Compose
 ```yaml
@@ -34,6 +35,12 @@ services:
       # Mount one or multiple directories directly under /watched
       - ./folder1:/watched/folder1:ro
       - ./folder2:/watched/folder2:ro
+      
+      # Internal folder for writing logs temporarily inside the container
+      # This is required to avoid issues with SMB or external mounts when writing logs
+      - folderlog_temp:/log_temp
+      
+      # Mount the logs directory as an external or SMB volume for persistent storage
       - ./logs:/logs
     environment:
       - LOG_EXT=.txt  # Change the log file extension (default is .log)
@@ -47,6 +54,9 @@ services:
       # Example 3: ignore multiple file types (.tmp, .log, .bak)
       # - EXCLUDE_REGEX=.*\.(tmp|log|bak)$
     restart: unless-stopped
+
+volumes:
+  folderlog_temp:
 ```
 
 ### Docker run example
@@ -57,18 +67,26 @@ docker run -d \
   -e EXCLUDE_REGEX=".*/(tmp|cache)/.*" \
   -v ./folder1:/watched/folder1:ro \
   -v ./folder2:/watched/folder2:ro \
-  -v ./logs:/logs \
+  -v folderlog_temp:/log_temp \  # Internal volume for temporary log storage to ensure reliable writes
+  -v ./logs:/logs \              # External mount for persistent log storage
   ghcr.io/diegocjorge/folderlog:latest
 ```
 
 ---
 
-## Notes on Multiple Directories
+## Notes on Multiple Directories and Log Persistence
 
 - You can mount **multiple directories** directly under `/watched` by specifying multiple `-v` options in your Docker run command.
 - Each top-level folder inside `/watched` will have its own separate log file named after the folder (e.g., `folder1.txt`, `folder2.txt`).
 - Events from subfolders are included in their parent folder’s log file.
-- This setup allows you to monitor multiple independent directories simultaneously with a single container instance.
+- **Logs are initially written inside the container to `/log_temp` to avoid issues with temporary files and file locking on SMB or other external mounts.**
+- The container then synchronizes logs from `/log_temp` to the mounted `/logs` directory, which should be a persistent volume (e.g., SMB share or external mount) to ensure logs are saved outside the container.
+- This two-step writing and synchronization approach guarantees reliable log storage and prevents corruption or loss of log data.
+- This setup allows you to monitor multiple independent directories simultaneously with a single container instance while ensuring consistent and persistent log storage.
+
+### What Happens If You Do Not Use a Persistent Volume for `/log_temp`
+
+If you do not mount a persistent volume for `/log_temp` inside the container, the logs written there will be stored only in the container's writable layer. This means that if the container is deleted, recreated, or updated, all logs stored in `/log_temp` will be lost permanently. Without a persistent volume, FolderLog cannot reliably retain logs across container restarts or removals. Therefore, mounting a persistent volume for `/log_temp` is strongly recommended to ensure that logs are safely preserved and synchronized to the external `/logs` directory for durable storage.
 
 ---
 
